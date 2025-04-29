@@ -1,0 +1,8 @@
+{
+  "deploy#BytesLib": "0xb37072C5b3663c2F5C61691160060579FDB4b436",
+  "deploy#Treasury": "0xda8F787257DAD5F467da24C934482E5bC6A27733",
+  "deploy#TransparentUpgradeableProxy": "0xE930618cb71CF072309Dc3B672760eD9C1a0a197",
+  "deploy#treasuryInstance": "0xE930618cb71CF072309Dc3B672760eD9C1a0a197",
+  "deploy#Vault": "0x06Df9594f4717D54C1c37f3D6a6c5B370Fbb5f6d",
+  "deploy#ProxyAdmin": "0x34ff5f6CFb37bA1818a51E734c983D56d2D29064"
+}
