@@ -1,6 +1,8 @@
 import { useState } from "react";
 import StableTokenABI from "./cusd-abi.json";
 import VaultABI from "./vault.json"
+import RouterABI from "./router.json"
+import BrokerABI from "./broker.json"
 import {
     createPublicClient,
     createWalletClient,
@@ -12,7 +14,7 @@ import {
     stringToHex,
     encodeFunctionData,
 } from "viem";
-import { ethers } from "ethers";
+import { ethers, constants } from "ethers";
 import { celo } from "viem/chains";
 import { Mento, getAddress } from "@mento-protocol/mento-sdk";
 
@@ -21,11 +23,18 @@ const publicClient = createPublicClient({
     transport: http(),
 });
 
-const vault = '0x06Df9594f4717D54C1c37f3D6a6c5B370Fbb5f6d'; // mainnet
+const vault = '0xC5Ea7410C4B4E9a3DC240c561058a21FB7A208F2'; // mainnet
 const USDC = "0xcebA9300f2b948710d2653dD7B07f33A8B32118C";
 const cUSD = "0x765DE816845861e75A25fCA122bb6898B8B1282a";
 const cKES = "0x456a3D042C0DbD3db53D5489e98dFb038553B0d0";
 const cREAL = "0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787";
+
+type TradeablePair = {
+    id: string;
+    providerAddr: string;
+    assetIn: string;
+    assetOut: string;
+}
 
 export const useWeb3 = () => {
     const [address, setAddress] = useState<string | null>(null);
@@ -67,7 +76,7 @@ export const useWeb3 = () => {
                 abi: StableTokenABI.abi,
                 functionName: "approve",
                 account: address,
-                args: [vault, amountInWei],
+                args: [vault, constants.MaxUint256],
             });
 
             await publicClient.waitForTransactionReceipt({
@@ -117,7 +126,7 @@ export const useWeb3 = () => {
         return receipt;
     }
 
-    const swap = async (assetIn: string, assetOut: string, amount: string) => {
+    const swap = async (fromAsset: string, toAsset: string, amount: string) => {
         let walletClient = createWalletClient({
             transport: custom(window.ethereum),
             chain: celo,
@@ -126,78 +135,147 @@ export const useWeb3 = () => {
         let [address] = await walletClient.getAddresses();
 
         const decimals = await publicClient.readContract({
-            address: assetIn as `0x${string}`,
+            address: fromAsset as `0x${string}`,
             abi: StableTokenABI.abi,
             functionName: "decimals",
         }) as number;
 
         const amountIn = parseUnits(amount, decimals);
 
-        const mento = await Mento.create(new ethers.providers.JsonRpcProvider(celo.rpcUrls.default.http[0]))
+        const mento = await Mento.create(new ethers.providers.JsonRpcProvider("https://forno.celo.org"))
 
-        const quoteAmountOut = await mento.getAmountOut(
-            assetIn,
-            assetOut,
+        const amountOutMin = Math.floor(Number(await mento.getAmountOut(
+            fromAsset,
+            toAsset,
             amountIn
-        )
+        )) * 99 / 100);
 
         const tradablePair = await mento.findPairForTokens(
-            assetIn,
-            assetOut
+            fromAsset,
+            toAsset
         )
 
-        // const router = getAddress("MentoRouter", celo.id)
-        // const allowance = await publicClient.readContract({
-        //     address: USDC,
-        //     abi: StableTokenABI.abi,
-        //     functionName: "allowance",
-        //     args: [address, router],
-        // }) as bigint;
+        if (tradablePair.path.length === 1) {
+            const broker = getAddress("Broker", celo.id)
+            const allowance = await publicClient.readContract({
+                address: fromAsset as `0x${string}`,
+                abi: StableTokenABI.abi,
+                functionName: "allowance",
+                args: [address, broker],
+            }) as bigint;
+            if (allowance < amountIn) {
+                await walletClient.writeContract({
+                    address: fromAsset as `0x${string}`,
+                    abi: StableTokenABI.abi,
+                    functionName: "approve",
+                    account: address,
+                    args: [broker, constants.MaxUint256],
+                });
+            }
 
-        // if (allowance < amountIn) {
-        //     await walletClient.writeContract({
-        //         address: USDC,
-        //         abi: StableTokenABI.abi,
-        //         functionName: "approve",
-        //         account: address,
-        //         args: [router, amountIn],
-        //     });
-        // }
+            const swapTx = await walletClient.writeContract({
+                address: broker as `0x${string}`,
+                abi: BrokerABI,
+                functionName: "swapIn",
+                account: address,
+                args: [
+                    tradablePair.path[0].providerAddr,
+                    tradablePair.path[0].id,
+                    fromAsset,
+                    toAsset,
+                    amountIn,
+                    amountOutMin
+                ]
+            })
+            let receipt = await publicClient.waitForTransactionReceipt({
+                hash: swapTx,
+            });
+            return receipt;
+        }
 
-        console.log(quoteAmountOut.toString())
-        const expectedAmoutOut = quoteAmountOut;
-        const swapTx = await mento.swapIn(
-            assetIn,
-            assetOut,
-            amountIn,
-            expectedAmoutOut,
-            tradablePair
-        );
+        const router = getAddress("MentoRouter", celo.id)
+        const allowance = await publicClient.readContract({
+            address: fromAsset as `0x${string}`,
+            abi: StableTokenABI.abi,
+            functionName: "allowance",
+            args: [address, router],
+        }) as bigint;
 
-        console.log(swapTx);
+        if (allowance < amountIn) {
+            await walletClient.writeContract({
+                address: fromAsset as `0x${string}`,
+                abi: StableTokenABI.abi,
+                functionName: "approve",
+                account: address,
+                args: [router, constants.MaxUint256],
+            });
+        }
 
+        const steps = await buildStep(fromAsset, toAsset);
 
-        // await walletClient.sendTransaction({
-        //     to: allowanceTx.to as `0x${string}`,
-        //     data: allowanceTx.data as `0x${string}`,
-        //     value: allowanceTx.value as bigint,
-        //     account: address
-        // })
+        const swapTx = await walletClient.writeContract({
+            address: router as `0x${string}`,
+            abi: RouterABI,
+            functionName: "swapExactTokensForTokens",
+            account: address,
+            args: [
+                amountIn,
+                amountOutMin,
+                steps
+            ]
+        });
+        const receipt = await publicClient.waitForTransactionReceipt({
+            hash: swapTx,
+        });
 
-        // const expectedAmoutOut = quoteAmountOut.mul(99).div(100);
-        // const swapTx = await mento.swapIn(
-        //     cUSD,
-        //     USDC,
-        //     amountIn,
-        //     expectedAmoutOut
-        // );
+        return receipt;
 
-        // await walletClient.sendTransaction({
-        //     to: swapTx.to as `0x${string}`,
-        //     data: swapTx.data as `0x${string}`,
-        //     value: swapTx.value as bigint,
-        //     account: address
-        // })
+    }
+
+    async function buildStep(fromAsset: string, toAsset: string) {
+        const mento = await Mento.create(new ethers.providers.JsonRpcProvider("https://forno.celo.org"))
+
+        const tradablePair = await mento.findPairForTokens(
+            fromAsset,
+            toAsset
+        )
+
+        let path = [...tradablePair.path];
+
+        if (path[0].assets.includes(toAsset)) {
+            path = path.reverse()
+        }
+
+        return path.map((step, idx) => {
+            const isFirstStep = idx === 0
+            const isLastStep = idx === tradablePair.path.length - 1
+            const prevStep = idx > 0 ? tradablePair.path[idx - 1] : null
+
+            // For first step, ensure assetIn is tokenIn
+            // For middle steps, ensure assetIn matches previous step's assetOut
+            // For last step, ensure assetOut is tokenOut
+            let [assetIn, assetOut] = step.assets
+
+            if (isFirstStep && assetIn !== fromAsset) {
+                ;[assetIn, assetOut] = [assetOut, assetIn]
+            } else if (
+                !isFirstStep &&
+                !isLastStep &&
+                assetIn !== prevStep!.assets[1]
+            ) {
+                ;[assetIn, assetOut] = [assetOut, assetIn]
+            } else if (isLastStep && assetOut !== toAsset) {
+                ;[assetIn, assetOut] = [assetOut, assetIn]
+            }
+
+            return {
+                exchangeProvider: step.providerAddr,
+                exchangeId: step.id,
+                assetIn,
+                assetOut,
+            }
+        })
+
     }
 
     async function getAssetBalance(asset: string) {
@@ -222,15 +300,20 @@ export const useWeb3 = () => {
 
 
     async function getQuote(assetIn: string, assetOut: string, amountIn: string) {
-        const decimals = await publicClient.readContract({
+        const decimalsOut = await publicClient.readContract({
             address: assetOut as `0x${string}`,
             abi: StableTokenABI.abi,
             functionName: "decimals",
         }) as bigint;
+        const decimalsIn = await publicClient.readContract({
+            address: assetIn as `0x${string}`,
+            abi: StableTokenABI.abi,
+            functionName: "decimals",
+        }) as bigint;
 
-        const amountInWei = parseUnits(amountIn, 6);
+        const amountInWei = parseUnits(amountIn, Number(decimalsIn));
 
-        const mento = await Mento.create(new ethers.providers.JsonRpcProvider(celo.rpcUrls.default.http[0]))
+        const mento = await Mento.create(new ethers.providers.JsonRpcProvider("https://forno.celo.org"))
 
         const quoteAmountOut = await mento.getAmountOut(
             assetIn,
@@ -238,7 +321,7 @@ export const useWeb3 = () => {
             amountInWei
         )
 
-        return parseFloat(quoteAmountOut.toString()) / Math.pow(10, parseInt(decimals.toString()));
+        return parseFloat(quoteAmountOut.toString()) / Math.pow(10, parseInt(decimalsOut.toString()));
     }
 
     function getAssetAddress(asset: string) {
@@ -266,6 +349,17 @@ export const useWeb3 = () => {
         return asset as `0x${string}`
     }
 
+    async function previewRedeem(amount: string) {
+        const amountInWei = parseUnits(amount, 6);
+        const receivedAmount = await publicClient.readContract({
+            address: vault,
+            abi: VaultABI,
+            functionName: "previewRedeem",
+            args: [amountInWei],
+        }) as bigint;
+        return parseFloat(receivedAmount.toString()) / Math.pow(10, 6);
+    }
+
     return {
         address,
         getAssetAddress,
@@ -274,6 +368,7 @@ export const useWeb3 = () => {
         withdraw,
         swap,
         getAssetBalance,
-        getQuote
+        getQuote,
+        previewRedeem,
     };
 };

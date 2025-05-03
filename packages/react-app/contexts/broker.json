@@ -1,0 +1,455 @@
+[
+  {
+    "inputs": [{ "internalType": "bool", "name": "test", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "exchangeProvider",
+        "type": "address"
+      }
+    ],
+    "name": "ExchangeProviderAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "exchangeProvider",
+        "type": "address"
+      }
+    ],
+    "name": "ExchangeProviderRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newAddress",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "prevAddress",
+        "type": "address"
+      }
+    ],
+    "name": "ReserveSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "exchangeProvider",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "exchangeId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "trader",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "tokenIn",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "tokenOut",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
+    "name": "Swap",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "exchangeId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "components": [
+          { "internalType": "uint32", "name": "timestep0", "type": "uint32" },
+          { "internalType": "uint32", "name": "timestep1", "type": "uint32" },
+          { "internalType": "int48", "name": "limit0", "type": "int48" },
+          { "internalType": "int48", "name": "limit1", "type": "int48" },
+          { "internalType": "int48", "name": "limitGlobal", "type": "int48" },
+          { "internalType": "uint8", "name": "flags", "type": "uint8" }
+        ],
+        "indexed": false,
+        "internalType": "struct TradingLimits.Config",
+        "name": "config",
+        "type": "tuple"
+      }
+    ],
+    "name": "TradingLimitConfigured",
+    "type": "event"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "exchangeProvider",
+        "type": "address"
+      }
+    ],
+    "name": "addExchangeProvider",
+    "outputs": [
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "token", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "burnStableTokens",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "bytes32", "name": "exchangeId", "type": "bytes32" },
+      { "internalType": "address", "name": "token", "type": "address" },
+      {
+        "components": [
+          { "internalType": "uint32", "name": "timestep0", "type": "uint32" },
+          { "internalType": "uint32", "name": "timestep1", "type": "uint32" },
+          { "internalType": "int48", "name": "limit0", "type": "int48" },
+          { "internalType": "int48", "name": "limit1", "type": "int48" },
+          { "internalType": "int48", "name": "limitGlobal", "type": "int48" },
+          { "internalType": "uint8", "name": "flags", "type": "uint8" }
+        ],
+        "internalType": "struct TradingLimits.Config",
+        "name": "config",
+        "type": "tuple"
+      }
+    ],
+    "name": "configureTradingLimit",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "exchangeProviders",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "exchangeProvider",
+        "type": "address"
+      },
+      { "internalType": "bytes32", "name": "exchangeId", "type": "bytes32" },
+      { "internalType": "address", "name": "tokenIn", "type": "address" },
+      { "internalType": "address", "name": "tokenOut", "type": "address" },
+      { "internalType": "uint256", "name": "amountOut", "type": "uint256" }
+    ],
+    "name": "getAmountIn",
+    "outputs": [
+      { "internalType": "uint256", "name": "amountIn", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "exchangeProvider",
+        "type": "address"
+      },
+      { "internalType": "bytes32", "name": "exchangeId", "type": "bytes32" },
+      { "internalType": "address", "name": "tokenIn", "type": "address" },
+      { "internalType": "address", "name": "tokenOut", "type": "address" },
+      { "internalType": "uint256", "name": "amountIn", "type": "uint256" }
+    ],
+    "name": "getAmountOut",
+    "outputs": [
+      { "internalType": "uint256", "name": "amountOut", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getExchangeProviders",
+    "outputs": [
+      { "internalType": "address[]", "name": "", "type": "address[]" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "_exchangeProviders",
+        "type": "address[]"
+      },
+      { "internalType": "address", "name": "_reserve", "type": "address" }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "initialized",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "isExchangeProvider",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isOwner",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "exchangeProvider",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "name": "removeExchangeProvider",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "reserve",
+    "outputs": [
+      { "internalType": "contract IReserve", "name": "", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "_reserve", "type": "address" }
+    ],
+    "name": "setReserve",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "exchangeProvider",
+        "type": "address"
+      },
+      { "internalType": "bytes32", "name": "exchangeId", "type": "bytes32" },
+      { "internalType": "address", "name": "tokenIn", "type": "address" },
+      { "internalType": "address", "name": "tokenOut", "type": "address" },
+      { "internalType": "uint256", "name": "amountIn", "type": "uint256" },
+      { "internalType": "uint256", "name": "amountOutMin", "type": "uint256" }
+    ],
+    "name": "swapIn",
+    "outputs": [
+      { "internalType": "uint256", "name": "amountOut", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "exchangeProvider",
+        "type": "address"
+      },
+      { "internalType": "bytes32", "name": "exchangeId", "type": "bytes32" },
+      { "internalType": "address", "name": "tokenIn", "type": "address" },
+      { "internalType": "address", "name": "tokenOut", "type": "address" },
+      { "internalType": "uint256", "name": "amountOut", "type": "uint256" },
+      { "internalType": "uint256", "name": "amountInMax", "type": "uint256" }
+    ],
+    "name": "swapOut",
+    "outputs": [
+      { "internalType": "uint256", "name": "amountIn", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "name": "tradingLimitsConfig",
+    "outputs": [
+      { "internalType": "uint32", "name": "timestep0", "type": "uint32" },
+      { "internalType": "uint32", "name": "timestep1", "type": "uint32" },
+      { "internalType": "int48", "name": "limit0", "type": "int48" },
+      { "internalType": "int48", "name": "limit1", "type": "int48" },
+      { "internalType": "int48", "name": "limitGlobal", "type": "int48" },
+      { "internalType": "uint8", "name": "flags", "type": "uint8" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "name": "tradingLimitsState",
+    "outputs": [
+      { "internalType": "uint32", "name": "lastUpdated0", "type": "uint32" },
+      { "internalType": "uint32", "name": "lastUpdated1", "type": "uint32" },
+      { "internalType": "int48", "name": "netflow0", "type": "int48" },
+      { "internalType": "int48", "name": "netflow1", "type": "int48" },
+      { "internalType": "int48", "name": "netflowGlobal", "type": "int48" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

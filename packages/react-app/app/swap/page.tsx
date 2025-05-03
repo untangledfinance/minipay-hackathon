@@ -79,7 +79,22 @@ export default function Swap() {
     if (address) {
       getData();
     }
-  }, [fromAmount, toAsset]);
+  }, [fromAmount]);
+
+  useEffect(() => {
+    const getData = async () => {
+      const assetAddress = getAssetAddress(fromAsset);
+      const quote = await getQuote(
+        assetAddress,
+        getAssetAddress(toAsset),
+        fromAmount
+      );
+      setToAmount(quote.toString());
+    };
+    if (address) {
+      getData();
+    }
+  }, [toAsset]);
 
   async function depositAsset() {
     setDepositLoading(true);
@@ -109,6 +124,7 @@ export default function Swap() {
     setSwapLoading(true);
     try {
       const tx = await swap(fromAsset, toAsset, fromAmount);
+      setTx(tx);
     } catch (error) {
       console.log(error);
     } finally {
@@ -161,14 +177,6 @@ export default function Swap() {
                 value={fromAmount}
                 onChange={async (e) => {
                   setFromAmount(e.target.value);
-                  const assetInAddress = getAssetAddress(fromAsset);
-                  const assetOutAddress = getAssetAddress(toAsset);
-                  const quote = await getQuote(
-                    assetInAddress,
-                    assetOutAddress,
-                    fromAmount
-                  );
-                  setToAmount(quote.toString());
                 }}
                 placeholder="Enter amount"
                 className="border rounded-md px-3 py-2 flex-1 mb-3"
@@ -243,14 +251,14 @@ export default function Swap() {
             </div>
           </div>
           <div className="w-full px-3 mt-5">
-            <Button
+            {/* <Button
               loading={swapLoading}
               onClick={() =>
                 swapAsset(getAssetAddress(fromAsset), getAssetAddress(toAsset))
               }
               title="Swap"
               widthFull
-            />
+            /> */}
           </div>
         </>
       )}

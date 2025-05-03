@@ -42,4 +42,5 @@ interface IVault {
         external
         view
         returns (address, address, address, address, address);
+    function setModule(address newModuleAddress, uint256 moduleType) external;
 }

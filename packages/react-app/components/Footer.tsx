@@ -47,7 +47,7 @@ export default function Footer() {
         </div>
         <div className="mt-8 md:order-1 md:mt-0">
           <p className="text-center text-base text-black">
-            &copy; {new Date().getFullYear()} Build for Minipay.
+            &copy; 2025 MiniPay | Powered by Untangled.
           </p>
         </div>
       </div>

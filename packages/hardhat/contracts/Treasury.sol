@@ -4,6 +4,7 @@ import {IERC20, ERC20, ERC4626, SafeERC20} from "@openzeppelin/contracts/token/E
 import {IVault} from "./interfaces/IVault.sol";
 import {IERC7540Redeem} from "./interfaces/IAsyncModule.sol";
 import {ITreasury} from "./interfaces/ITreasury.sol";
+import {IValuationModule} from "./interfaces/IValuationModule.sol";
 import {BytesLib} from "./libraries/BytesLib.sol";
 
 contract Treasury is ITreasury {
@@ -54,6 +55,9 @@ contract Treasury is ITreasury {
     mapping(bytes32 => bool) public approvedCalls;
     mapping(bytes32 => Call) public calls;
 
+    uint256 public totalAllocationRate;
+    mapping(address => uint256) public allocationRates;
+
     function initialize(address _asset) external {
         require(owner == address(0), "Already initialized");
         owner = msg.sender;
@@ -75,6 +79,21 @@ contract Treasury is ITreasury {
         if (msg.sender != curator && msg.sender != owner)
             revert Unauthorized(msg.sender, curator);
         _;
+    }
+
+    function setAllocationRate(
+        address target,
+        uint256 rate
+    ) public onlyCuratorOrOwner {
+        require(
+            totalAllocationRate - allocationRates[target] + rate <= 100,
+            "Total allocation rate exceeds 100%"
+        );
+        totalAllocationRate =
+            totalAllocationRate -
+            allocationRates[target] +
+            rate;
+        allocationRates[target] = rate;
     }
 
     function getCallId(
@@ -144,6 +163,10 @@ contract Treasury is ITreasury {
         IERC20(asset).approve(_vault, type(uint256).max);
     }
 
+    function setValuationModule(address valuationModule) external onlyOwner {
+        IVault(vault).setModule(valuationModule, 1);
+    }
+
     // function setAllocationRate(uint256 _allocationRate) external onlyOwner {
     //     require(_allocationRate > 0, "Allocation rate must be greater than 0");
     //     require(
@@ -155,13 +178,13 @@ contract Treasury is ITreasury {
 
     function useDeposit(uint256 assets) external onlyVault {
         require(assets > 0, "Assets must be greater than 0");
-        uint256 allocation0 = (assets * 80) / 100;
         address target0 = 0x3E59A31363E2ad014dcbc521c4a0d5757d9f3402;
+        uint256 allocation0 = (assets * allocationRates[target0]) / 100;
         {
             (bool approveCall, ) = asset.call(
                 abi.encodeWithSelector(bytes4(0x095ea7b3), target0, allocation0)
             );
-            require(approveCall, "Approve call failed");
+            require(approveCall, "Approve0 call failed");
 
             (bool depositCall, ) = target0.call(
                 abi.encodeWithSelector(
@@ -172,7 +195,26 @@ contract Treasury is ITreasury {
                     0
                 )
             );
-            require(depositCall, "Deposit call failed");
+            require(depositCall, "Deposit0 call failed");
+        }
+
+        address target1 = 0x2A68c98bD43AA24331396F29166aeF2Bfd51343f;
+        uint256 allocation1 = (assets * allocationRates[target1]) / 100;
+        {
+            (bool approveCall, ) = asset.call(
+                abi.encodeWithSelector(bytes4(0x095ea7b3), target1, allocation1)
+            );
+
+            require(approveCall, "Approve1 call failed");
+
+            (bool depositCall, ) = target1.call(
+                abi.encodeWithSelector(
+                    bytes4(0x6e553f65),
+                    allocation1,
+                    address(this)
+                )
+            );
+            require(depositCall, "Deposit1 call failed");
         }
     }
 
@@ -180,6 +222,7 @@ contract Treasury is ITreasury {
         require(assets > 0, "Assets must be greater than 0");
         address target0 = 0x3E59A31363E2ad014dcbc521c4a0d5757d9f3402;
         address aToken = 0xFF8309b9e99bfd2D4021bc71a362aBD93dBd4785;
+
         // approve aToken to be spent by pool
         (bool approveCall, ) = aToken.call(
             abi.encodeWithSelector(bytes4(0x095ea7b3), target0, assets)
@@ -195,6 +238,35 @@ contract Treasury is ITreasury {
             )
         );
         require(withdrawCall, "Withdraw call failed");
+    }
+
+    function withdraw1(uint256 shares) external onlyOwner {
+        require(shares > 0, "Assets must be greater than 0");
+        address target1 = 0x3EaF7d86EaEe61d1c25bA4a68c2b5E291F209dc5;
+        (bool withdrawCall, ) = target1.call(
+            abi.encodeWithSelector(
+                bytes4(0x7d41c86e),
+                shares,
+                address(this),
+                address(this)
+            )
+        );
+        require(withdrawCall, "Withdraw call failed");
+    }
+
+    function addAsset(
+        address _asset,
+        uint256 decimals,
+        address priceOracle,
+        bytes memory getPriceCall
+    ) external onlyOwner {
+        (, address valuation, , , ) = IVault(vault).getModules();
+        IValuationModule(valuation).addAsset(
+            _asset,
+            decimals,
+            priceOracle,
+            getPriceCall
+        );
     }
 
     // function withdrawInvestment(uint256 shares) external onlyOwner {
