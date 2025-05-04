@@ -8,6 +8,8 @@ As recommended by the MiniPay team, this solution focuses on yield opportunities
 
 ![Save Button](Untangled_Minipay_"Save"_button.png)
 
+![Save Button](Send%20Swap%20and%20now%20Save%20MiniPay.png)
+
 ## Minipay users need a "Save" button
 Effortlessly swap local stables cKES, cZAR, cCOB, cREAL and deposit into a USD saving product currently yielding 8% -10% APY on Celo blockchain.
 
