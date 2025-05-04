@@ -1,6 +1,7 @@
 # Untangled MiniPay "Save" Button
 
-Minipay/Global Stablecoin Hackathon: https://gap.karmahq.xyz/community/celo?programId=889_42161
+
+Minipay/Global Stablecoin Hackathon: https://gap.karmahq.xyz/project/untangled_minipay-save-button/funding/0xd92d5e3c85c930444c50aafd1a0f7899fc5c032af2d641d4308034ab05896f50/milestones-and-updates
 
 This project is for 2 tracks: Multi-currency Borrow/Lending or Yield and Inflation Protection and Swapping 
 
