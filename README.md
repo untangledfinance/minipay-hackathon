@@ -5,6 +5,7 @@ Minipay/Global Stablecoin Hackathon: https://gap.karmahq.xyz/community/celo?prog
 This project is for 2 tracks: Multi-currency Borrow/Lending or Yield and Inflation Protection and Swapping 
 
 As recommended by the MiniPay team, this solution focuses on yield opportunities on the Celo blockchain. 
+
 ![Save Button](Untangled_Minipay_"Save"_button.png)
 
 ## Minipay users need a "Save" button
