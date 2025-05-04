@@ -3,6 +3,7 @@
 This project is for 2 tracks: Multi-currency Borrow/Lending or Yield and Inflation Protection and Swapping 
 
 As recommended by the MiniPay team, this solution focuses on yield opportunities on the Celo blockchain. Minipay users need a "Save" button 
+![Save Button](Untangled_Minipay_"Save"_button.png)
 
 Effortlessly swap local stables cKES, cZAR, cCOB, cREAL and deposit into a USD saving product currently yielding 8% -10% APY on Celo blockchain.
 
