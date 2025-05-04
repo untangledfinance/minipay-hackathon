@@ -18,3 +18,5 @@ Deck: https://drive.google.com/open?id=1cc6zu0yBCxzAiY1KaOiVz8SfECIqsFVi&usp=dri
 App: https://minipay-hackathon.vercel.app/ 
 
 Untangled Embedded Yield Layer enables the MiniPay “Save” button. A greater depth into how it works here: https://mirror.xyz/untangledcredio.eth/qOgwJCsGIj8Vee6JBkig8_S5vxToIW7qLvBXzh8TGRs
+
+![Untangled Embedded Yield Layer](Untangled_Embedded_Yield_Layer.png)
