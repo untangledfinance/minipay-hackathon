@@ -4,9 +4,10 @@ Minipay/Global Stablecoin Hackathon: https://gap.karmahq.xyz/community/celo?prog
 
 This project is for 2 tracks: Multi-currency Borrow/Lending or Yield and Inflation Protection and Swapping 
 
-As recommended by the MiniPay team, this solution focuses on yield opportunities on the Celo blockchain. Minipay users need a "Save" button 
+As recommended by the MiniPay team, this solution focuses on yield opportunities on the Celo blockchain. 
 ![Save Button](Untangled_Minipay_"Save"_button.png)
 
+## Minipay users need a "Save" button
 Effortlessly swap local stables cKES, cZAR, cCOB, cREAL and deposit into a USD saving product currently yielding 8% -10% APY on Celo blockchain.
 
 Video demo: https://flonnect.com/video/b44d519f1a4b-4cd7-89ad-48b9ac6989f1 
